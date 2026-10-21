@@ -19,6 +19,7 @@
   --accent-ink: #ffffff;
   --accent-wash: rgba(59, 58, 214, 0.09);
   --danger: #c62f2f;
+  --danger-wash: rgba(198, 47, 47, 0.09);
   --up: #b4361e;
   --down: #0b7a3b;
   --shadow: 0 1px 2px rgba(18,21,28,.05), 0 6px 24px -12px rgba(18,21,28,.18);
@@ -38,7 +39,7 @@
     --ink: #eef0f4; --ink-2: #b9bfcc; --muted: #8c93a2;
     --grid: #262a33; --axis: #3a3f4b; --ring: rgba(255,255,255,0.09);
     --accent: #8f8cff; --accent-ink: #12111f; --accent-wash: rgba(143,140,255,0.14);
-    --danger: #f07171; --up: #f08a6a; --down: #4cc98a;
+    --danger: #f07171; --danger-wash: rgba(240, 113, 113, 0.13); --up: #f08a6a; --down: #4cc98a;
     --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 28px -14px rgba(0,0,0,.7);
     --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500;
     --c5: #d55181; --c6: #008300; --c7: #9085e9; --c8: #e66767; --c9: #6f7584; --inc: #aab6cc;
@@ -50,7 +51,7 @@
   --ink: #eef0f4; --ink-2: #b9bfcc; --muted: #8c93a2;
   --grid: #262a33; --axis: #3a3f4b; --ring: rgba(255,255,255,0.09);
   --accent: #8f8cff; --accent-ink: #12111f; --accent-wash: rgba(143,140,255,0.14);
-  --danger: #f07171; --up: #f08a6a; --down: #4cc98a;
+  --danger: #f07171; --danger-wash: rgba(240, 113, 113, 0.13); --up: #f08a6a; --down: #4cc98a;
   --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 28px -14px rgba(0,0,0,.7);
   --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500;
   --c5: #d55181; --c6: #008300; --c7: #9085e9; --c8: #e66767; --c9: #6f7584; --inc: #aab6cc;
@@ -257,6 +258,13 @@ td.desc { min-width: 140px; }
 .tip .t-row.hl i { height: 10px; border-radius: 3px; }
 .tip .t-empty { color: var(--muted); }
 
+.notice.danger { background: var(--danger-wash); }
+.notice .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn.danger { background: var(--danger); color: var(--surface); border-color: transparent; }
+.btn.danger:hover { background: var(--danger); filter: brightness(1.08); }
+.rowbtns { display: flex; gap: 2px; justify-content: flex-end; }
+.del.edit:hover { color: var(--accent); }
+tr.editing td { background: var(--accent-wash); }
 .type-seg { box-shadow: none; background: var(--surface-2); width: 100%; }
 .type-seg button { flex: 1; }
 td.amt.inc { color: var(--down); font-weight: 700; }
@@ -297,12 +305,21 @@ td.amt.inc { color: var(--down); font-weight: 700; }
       <button class="btn" id="btn-export" type="button">Exportar CSV</button>
       <label class="btn" for="file-import" style="display:inline-flex;align-items:center">Importar CSV</label>
       <input type="file" id="file-import" accept=".csv,text/csv" hidden>
+      <button class="btn ghost" id="btn-reset" type="button" hidden>Empezar de cero</button>
     </div>
   </header>
 
   <div class="notice" id="sample-notice" hidden>
     <p><strong>Estás viendo datos de ejemplo.</strong> Añade tu primer gasto o ingreso abajo y el cuaderno pasará a mostrar solo los tuyos.</p>
     <button class="btn" id="btn-clear-sample" type="button">Empezar en blanco</button>
+  </div>
+  <div class="notice danger" id="reset-notice" hidden>
+    <p><strong>¿Borrar todos tus movimientos?</strong> <span id="reset-text"></span> No se puede deshacer. Si quieres conservar una copia, exporta antes un CSV.</p>
+    <div class="actions">
+      <button class="btn" id="reset-export" type="button">Exportar CSV</button>
+      <button class="btn danger" id="reset-confirm" type="button">Borrar todo</button>
+      <button class="btn ghost" id="reset-cancel" type="button">Cancelar</button>
+    </div>
   </div>
   <div class="notice" id="msg-notice" hidden><p id="msg-text"></p><button class="btn ghost" id="msg-close" type="button">Cerrar</button></div>
 
@@ -390,6 +407,7 @@ td.amt.inc { color: var(--down); font-weight: 700; }
         </div>
         <div class="quick" id="quick" aria-label="Atajos"></div>
         <button class="btn primary" type="submit" id="f-submit">Añadir gasto</button>
+        <button class="btn ghost" type="button" id="f-cancel" hidden>Cancelar edición</button>
         <p class="form-msg" id="form-msg" role="status"></p>
       </form>
     </section>
@@ -800,6 +818,7 @@ td.amt.inc { color: var(--down); font-weight: 700; }
     document.querySelectorAll("#chips .chip").forEach(c => c.setAttribute("aria-pressed", String(!state.hidden.has(c.dataset.k))));
 
     $("#sample-notice").hidden = !usingSample();
+    $("#btn-reset").hidden = realItems().length === 0;
 
     // cifras
     const mk = monthKeys();
@@ -978,6 +997,7 @@ td.amt.inc { color: var(--down); font-weight: 700; }
     }
     sorted.slice(0, state.shown).forEach(it => {
       const tr = document.createElement("tr");
+      if (state.editing && state.editing.id === it.id) tr.className = "editing";
       const d = document.createElement("td"); d.className = "date"; d.textContent = cap(fmtDayLong.format(parse(it.f)).replace(".", ""));
       const de = document.createElement("td"); de.className = "desc"; de.textContent = it.d || "—";
       const c = document.createElement("td"); const tag = document.createElement("span"); tag.className = "tag";
@@ -985,6 +1005,10 @@ td.amt.inc { color: var(--down); font-weight: 700; }
       const a = document.createElement("td"); a.className = "amt num" + (isInc(it) ? " inc" : ""); a.textContent = (isInc(it) ? "+" : "") + money(it.m);
       const x = document.createElement("td");
       if (!usingSample()) {
+        const box = document.createElement("div"); box.className = "rowbtns";
+        const ed = document.createElement("button"); ed.type = "button"; ed.className = "del edit"; ed.textContent = "Editar";
+        ed.setAttribute("aria-label", `Editar ${nameOf(it)} del ${it.f}`);
+        ed.addEventListener("click", () => startEdit(it));
         const btn = document.createElement("button"); btn.type = "button"; btn.className = "del"; btn.textContent = "Eliminar";
         btn.addEventListener("click", () => {
           if (!btn.classList.contains("confirm")) {
@@ -994,7 +1018,7 @@ td.amt.inc { color: var(--down); font-weight: 700; }
           }
           removeItem(it);
         });
-        x.append(btn);
+        box.append(ed, btn); x.append(box);
       }
       tr.append(d, de, c, a, x); body.append(tr);
     });
@@ -1053,7 +1077,17 @@ td.amt.inc { color: var(--down); font-weight: 700; }
     touched.forEach(persist);
     render();
   }
+  function replaceItem(old, item) {
+    const om = monthKey(old.f), nm = monthKey(item.f);
+    state.months[om] = (state.months[om] || []).filter(x => x.id !== old.id);
+    if (!state.months[om].length) delete state.months[om];
+    (state.months[nm] = state.months[nm] || []).push(item);
+    persist(om);
+    if (nm !== om) persist(nm);
+    render();
+  }
   function removeItem(it) {
+    if (state.editing && state.editing.id === it.id) cancelEdit();
     const mk = monthKey(it.f);
     state.months[mk] = (state.months[mk] || []).filter(x => x.id !== it.id);
     if (!state.months[mk].length) delete state.months[mk];
@@ -1149,6 +1183,35 @@ td.amt.inc { color: var(--down); font-weight: 700; }
     $("#f-title").textContent = inc ? "Añadir ingreso" : "Añadir gasto";
     $("#f-submit").textContent = inc ? "Añadir ingreso" : "Añadir gasto";
     $("#f-desc").placeholder = inc ? "Ej.: nómina de octubre" : "Ej.: compra semanal en el súper";
+    if (state.editing) {
+      $("#f-title").textContent = inc ? "Editar ingreso" : "Editar gasto";
+      $("#f-submit").textContent = "Guardar cambios";
+    }
+  }
+
+  // ---------- Editar un movimiento ----------
+  function startEdit(it) {
+    state.editing = it;
+    setFormType(isInc(it) ? "i" : "g");
+    $("#f-amount").value = String(it.m).replace(".", ",");
+    $("#f-desc").value = it.d || "";
+    $("#f-cat").value = it.c;
+    $("#f-date").value = it.f;
+    $("#f-cancel").hidden = false;
+    const msg = $("#form-msg"); msg.className = "form-msg";
+    msg.textContent = "Cambia lo que necesites y pulsa «Guardar cambios».";
+    render();
+    $("#form-add").scrollIntoView({ behavior: "smooth", block: "center" });
+    $("#f-amount").focus({ preventScroll: true });
+  }
+  function cancelEdit() {
+    if (!state.editing) return;
+    state.editing = null;
+    setFormType(state.formType || "g");
+    $("#f-cancel").hidden = true;
+    $("#f-amount").value = ""; $("#f-desc").value = ""; $("#f-date").value = iso(today());
+    $("#form-msg").textContent = "";
+    render();
   }
 
   // ---------- Montaje de controles ----------
@@ -1187,12 +1250,41 @@ td.amt.inc { color: var(--down); font-weight: 700; }
       if (!validDate(f)) { msg.className = "form-msg err"; msg.textContent = "Elige una fecha válida."; return; }
       const c = $("#f-cat").value, d = $("#f-desc").value.trim().slice(0, 80);
       const inc = state.formType === "i";
-      addItems([{ id: newId(), f, c, m, d, ...(inc ? { t: "i" } : {}) }]);
+      const wasEditing = !!state.editing;
+      const item = { id: wasEditing ? state.editing.id : newId(), f, c, m, d, ...(inc ? { t: "i" } : {}) };
+      if (wasEditing) {
+        const old = state.editing;
+        state.editing = null;
+        setFormType(state.formType);
+        $("#f-cancel").hidden = true;
+        $("#f-date").value = iso(today());
+        replaceItem(old, item);
+      } else addItems([item]);
       if (f < state.from || f > state.to) { state.preset = "todo"; render(); }
-      msg.className = "form-msg"; msg.textContent = `Añadido: ${money(m)} en ${inc ? (INCK[c] || INCK.otros_ing).n : CAT[c].n}.`;
+      msg.className = "form-msg"; msg.textContent = `${wasEditing ? "Guardado" : "Añadido"}: ${money(m)} en ${inc ? (INCK[c] || INCK.otros_ing).n : CAT[c].n}.`;
       $("#f-amount").value = ""; $("#f-desc").value = ""; $("#f-amount").focus();
     });
 
+    $("#btn-reset").addEventListener("click", () => {
+      const n = realItems().length;
+      $("#reset-text").textContent = `Se borrarán ${n} ${n === 1 ? "movimiento guardado" : "movimientos guardados"} ${state.mode === "cuenta" ? "en tu cuenta" : "en este navegador"}.`;
+      $("#reset-notice").hidden = false;
+      $("#reset-notice").scrollIntoView({ behavior: "smooth", block: "center" });
+      $("#reset-cancel").focus({ preventScroll: true });
+    });
+    $("#reset-cancel").addEventListener("click", () => { $("#reset-notice").hidden = true; });
+    $("#reset-export").addEventListener("click", () => $("#btn-export").click());
+    $("#reset-confirm").addEventListener("click", () => {
+      if (state.editing) cancelEdit();
+      const keys = Object.keys(state.months);
+      state.months = {};
+      keys.forEach(persist);
+      state.hideSample = true; ls.set(LS_KEY + ":nosample", true);
+      $("#reset-notice").hidden = true;
+      flash("Listo: el cuaderno está en blanco.");
+      render();
+    });
+    $("#f-cancel").addEventListener("click", cancelEdit);
     $("#btn-clear-sample").addEventListener("click", () => { state.hideSample = true; ls.set(LS_KEY + ":nosample", true); render(); });
     $("#msg-close").addEventListener("click", () => { $("#msg-notice").hidden = true; });
     $("#btn-more").addEventListener("click", () => { state.shown += 60; render(); });

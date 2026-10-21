@@ -265,6 +265,17 @@ td.desc { min-width: 140px; }
 .rowbtns { display: flex; gap: 2px; justify-content: flex-end; }
 .del.edit:hover { color: var(--accent); }
 tr.editing td { background: var(--accent-wash); }
+.chip.rename { border-style: dashed; color: var(--ink-2); background: transparent; }
+.chip.rename:hover { color: var(--ink); border-style: solid; }
+.names { display: grid; gap: 18px; }
+.names fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; min-width: 0; }
+.names legend { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; padding: 0; margin-bottom: 8px; }
+.names-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px 16px; }
+.nm-row { display: grid; grid-template-columns: 12px minmax(0, 1fr); gap: 10px; align-items: center; }
+.nm-row i { width: 12px; height: 12px; border-radius: 4px; display: block; }
+.nm-row input { width: 100%; border: 1px solid var(--ring); background: var(--bg); border-radius: 10px; padding: 8px 10px; }
+.names .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.names .hint { margin: 0; font-size: 13px; color: var(--muted); }
 .type-seg { box-shadow: none; background: var(--surface-2); width: 100%; }
 .type-seg button { flex: 1; }
 td.amt.inc { color: var(--down); font-weight: 700; }
@@ -342,6 +353,24 @@ td.amt.inc { color: var(--down); font-weight: 700; }
       <div class="chips" id="chips" role="group" aria-label="Categorías"></div>
       <span class="range-label" id="range-label"></span>
     </div>
+  </section>
+
+  <section class="card" id="names-card" hidden>
+    <div class="card-head">
+      <h2>Nombres de categorías</h2>
+      <span class="sub">El nombre nuevo se aplica también a los movimientos que ya tienes</span>
+    </div>
+    <form class="names" id="names-form" novalidate>
+      <fieldset><legend>Gastos</legend><div class="names-grid" id="names-exp"></div></fieldset>
+      <fieldset><legend>Ingresos</legend><div class="names-grid" id="names-inc"></div></fieldset>
+      <p class="hint">Deja un campo vacío para usar el nombre original. «Otros» y «Otros ingresos» no se pueden renombrar: recogen lo que no encaja en otra categoría.</p>
+      <div class="actions">
+        <button class="btn primary" type="submit">Guardar nombres</button>
+        <button class="btn" type="button" id="names-reset">Volver a los nombres originales</button>
+        <button class="btn ghost" type="button" id="names-close">Cerrar</button>
+      </div>
+      <p class="form-msg" id="names-msg" role="status"></p>
+    </form>
   </section>
 
   <section class="stats" aria-label="Resumen">
@@ -444,7 +473,7 @@ td.amt.inc { color: var(--down); font-weight: 700; }
         <li>En la app Atajos, crea un atajo nuevo.</li>
         <li><b>Solicitar entrada</b> de tipo Número, con la pregunta «¿Cuánto?».</li>
         <li><b>Reemplazar texto</b>: cambia «,» por «.» en la respuesta anterior.</li>
-        <li><b>Elegir de la lista</b> con estas opciones: comida, transporte, entretenimiento, suscripciones, hogar, salud, compras, educacion, otros.</li>
+        <li><b>Elegir de la lista</b> con estas opciones: comida, transporte, entretenimiento, suscripciones, hogar, salud, compras, educacion, otros. Si renombraste alguna categoría, escribe el nombre nuevo sin tildes.</li>
         <li><b>Solicitar entrada</b> de tipo Texto para el concepto, y después <b>Reemplazar texto</b>: cambia los espacios por «_». Evita tildes y eñes: se pueden perder por el camino.</li>
         <li><b>Abrir URL</b> con esta dirección, sustituyendo cada parte por su variable: importe, categoría y concepto.</li>
       </ol>
@@ -481,6 +510,16 @@ td.amt.inc { color: var(--down); font-weight: 700; }
   ];
   const INCK = Object.fromEntries(INC.map(c => [c.k, c]));
   const QUICK_INC = [["Nómina", "salario"], ["Freelance", "extra"], ["Venta", "ventas"], ["Regalo", "regalos"]];
+  CATS.forEach(c => { c.def = c.n; });
+  INC.forEach(c => { c.def = c.n; });
+  const FIXED = new Set(["otros", "otros_ing"]);
+  function applyNames(map) {
+    state.names = map && typeof map === "object" ? map : {};
+    [...CATS, ...INC].forEach(c => {
+      const v = state.names[c.k];
+      c.n = !FIXED.has(c.k) && typeof v === "string" && v.trim() ? v.trim().slice(0, 24) : c.def;
+    });
+  }
   const isInc = it => it.t === "i";
   const nameOf = it => isInc(it) ? (INCK[it.c] || INCK.otros_ing).n : (CAT[it.c] || CAT.otros).n;
   const dotOf = it => isInc(it) ? "var(--inc)" : colorOf(it.c);
@@ -815,7 +854,7 @@ td.amt.inc { color: var(--down); font-weight: 700; }
     $("#custom-range").hidden = state.preset !== "custom";
     if (state.preset !== "custom") { $("#from").value = state.from; $("#to").value = state.to; }
     $("#range-label").textContent = `${fmtDay.format(parse(state.from))} ${parse(state.from).getFullYear()} – ${fmtDay.format(parse(state.to))} ${parse(state.to).getFullYear()}`;
-    document.querySelectorAll("#chips .chip").forEach(c => c.setAttribute("aria-pressed", String(!state.hidden.has(c.dataset.k))));
+    document.querySelectorAll("#chips .chip[data-k]").forEach(c => c.setAttribute("aria-pressed", String(!state.hidden.has(c.dataset.k))));
 
     $("#sample-notice").hidden = !usingSample();
     $("#btn-reset").hidden = realItems().length === 0;
@@ -1124,14 +1163,14 @@ td.amt.inc { color: var(--down); font-weight: 700; }
   const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
   function catFrom(s) {
     const n = norm(s || "");
-    const hit = CATS.find(c => norm(c.k) === n || norm(c.n) === n);
+    const hit = CATS.find(c => norm(c.k) === n || norm(c.n) === n || norm(c.def) === n);
     if (hit) return hit.k;
     const partial = CATS.find(c => n && (norm(c.n).includes(n) || n.includes(norm(c.k))));
     return partial ? partial.k : "otros";
   }
   function catFromInc(s) {
     const n = norm(s || "");
-    const hit = INC.find(c => norm(c.k) === n || norm(c.n) === n);
+    const hit = INC.find(c => norm(c.k) === n || norm(c.n) === n || norm(c.def) === n);
     if (hit) return hit.k;
     const partial = INC.find(c => n && (norm(c.n).includes(n) || n.includes(norm(c.k))));
     return partial ? partial.k : "otros_ing";
@@ -1167,13 +1206,97 @@ td.amt.inc { color: var(--down); font-weight: 700; }
     flash(`Importados ${out.length} movimientos${bad ? `; ${bad} filas no se pudieron leer (revisa la fecha y el importe)` : ""}.`);
   }
 
+  // ---------- Nombres de categorías ----------
+  function buildChips() {
+    const chips = $("#chips"); chips.replaceChildren();
+    CATS.forEach(c => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.dataset.k = c.k;
+      b.setAttribute("aria-pressed", String(!state.hidden.has(c.k)));
+      const i = document.createElement("i"); i.style.background = colorOf(c.k);
+      b.append(i, document.createTextNode(c.n));
+      b.addEventListener("click", () => {
+        state.hidden.has(c.k) ? state.hidden.delete(c.k) : state.hidden.add(c.k);
+        if (state.hidden.size === CATS.length) state.hidden.clear();
+        ls.set(LS_KEY + ":hidden", [...state.hidden]); render();
+      });
+      chips.append(b);
+    });
+    const r = document.createElement("button"); r.type = "button"; r.className = "chip rename"; r.id = "btn-rename";
+    r.textContent = "Renombrar categorías";
+    r.addEventListener("click", openNames);
+    chips.append(r);
+  }
+  function nameRow(c, color) {
+    const row = document.createElement("label"); row.className = "nm-row"; row.htmlFor = "nm-" + c.k;
+    const i = document.createElement("i"); i.style.background = color;
+    const inp = document.createElement("input"); inp.id = "nm-" + c.k; inp.maxLength = 24; inp.autocomplete = "off";
+    inp.placeholder = c.def; inp.dataset.k = c.k;
+    inp.setAttribute("aria-label", `Nombre para «${c.def}»`);
+    row.append(i, inp);
+    return row;
+  }
+  function fillNames() {
+    const ex = $("#names-exp"), inc = $("#names-inc");
+    if (!ex.children.length) {
+      CATS.filter(c => !FIXED.has(c.k)).forEach(c => ex.append(nameRow(c, colorOf(c.k))));
+      INC.filter(c => !FIXED.has(c.k)).forEach(c => inc.append(nameRow(c, "var(--inc)")));
+    }
+    document.querySelectorAll("#names-form input[data-k]").forEach(inp => { const c = CAT[inp.dataset.k] || INCK[inp.dataset.k]; inp.value = c.n; });
+  }
+  function openNames() {
+    fillNames();
+    $("#names-msg").textContent = "";
+    $("#names-card").hidden = false;
+    $("#names-card").scrollIntoView({ behavior: "smooth", block: "start" });
+    $("#names-form input").focus({ preventScroll: true });
+  }
+  function submitNames() {
+    const map = {};
+    document.querySelectorAll("#names-form input[data-k]").forEach(inp => {
+      const v = inp.value.trim().slice(0, 24);
+      const c = CAT[inp.dataset.k] || INCK[inp.dataset.k];
+      if (v && norm(v) !== norm(c.def)) map[c.k] = v;
+    });
+    const msg = $("#names-msg");
+    for (const group of [CATS, INC]) {
+      const seen = new Map();
+      for (const c of group) {
+        const n = norm(map[c.k] || c.def);
+        if (seen.has(n)) {
+          msg.className = "form-msg err";
+          msg.textContent = `Dos categorías no pueden llamarse igual: «${map[c.k] || c.def}». Cambia uno de los nombres.`;
+          return;
+        }
+        seen.set(n, c.k);
+      }
+    }
+    saveNames(map);
+    msg.className = "form-msg"; msg.textContent = "Nombres guardados.";
+  }
+  function refreshNameUI() {
+    buildChips();
+    setFormType(state.formType || "g");
+    if (!$("#names-card").hidden) fillNames();
+  }
+  async function saveNames(map) {
+    applyNames(map);
+    ls.set(LS_KEY + ":nombres", state.names);
+    refreshNameUI();
+    render();
+    if (state.mode === "cuenta" && state.db && state.uid) {
+      try { await state.db.collection("data/users/" + state.uid).doc("ajustes").set({ nombres: state.names }); }
+      catch { flash("No se pudieron guardar los nombres en tu cuenta. De momento se guardan en este navegador."); }
+    }
+  }
+
   // ---------- Tipo de movimiento del formulario ----------
   function setFormType(t) {
     state.formType = t;
     const inc = t === "i";
     document.querySelectorAll("#f-type button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.t === t)));
-    const sel = $("#f-cat"); sel.replaceChildren();
+    const sel = $("#f-cat"); const prev = sel.value; sel.replaceChildren();
     (inc ? INC : CATS).forEach(c => { const o = document.createElement("option"); o.value = c.k; o.textContent = c.n; sel.append(o); });
+    if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
     const q = $("#quick"); q.replaceChildren();
     (inc ? QUICK_INC : QUICK).forEach(([label, k]) => {
       const b = document.createElement("button"); b.type = "button"; b.textContent = label;
@@ -1216,18 +1339,14 @@ td.amt.inc { color: var(--down); font-weight: 700; }
 
   // ---------- Montaje de controles ----------
   function setupControls() {
-    const chips = $("#chips");
-    CATS.forEach(c => {
-      const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.dataset.k = c.k;
-      const i = document.createElement("i"); i.style.background = colorOf(c.k);
-      b.append(i, document.createTextNode(c.n));
-      b.addEventListener("click", () => {
-        state.hidden.has(c.k) ? state.hidden.delete(c.k) : state.hidden.add(c.k);
-        if (state.hidden.size === CATS.length) state.hidden.clear();
-        ls.set(LS_KEY + ":hidden", [...state.hidden]); render();
-      });
-      chips.append(b);
+    buildChips();
+    $("#names-form").addEventListener("submit", e => { e.preventDefault(); submitNames(); });
+    $("#names-reset").addEventListener("click", async () => {
+      await saveNames({});
+      fillNames();
+      $("#names-msg").className = "form-msg"; $("#names-msg").textContent = "Se han recuperado los nombres originales.";
     });
+    $("#names-close").addEventListener("click", () => { $("#names-card").hidden = true; });
     document.querySelectorAll("#f-type button").forEach(b => b.addEventListener("click", () => setFormType(b.dataset.t)));
     setFormType("g");
     $("#f-date").value = iso(today());
@@ -1340,6 +1459,13 @@ td.amt.inc { color: var(--down); font-weight: 700; }
     try {
       state.unsub = db.collection("data/users/" + uid).onSnapshot(snap => {
         const months = {};
+        const aj = snap.docs.find(d => d.id === "ajustes");
+        const remoteNames = aj && aj.data() && aj.data().nombres;
+        if (remoteNames && JSON.stringify(remoteNames) !== JSON.stringify(state.names)) {
+          applyNames(remoteNames); ls.set(LS_KEY + ":nombres", state.names); refreshNameUI();
+        } else if (first && !aj && Object.keys(state.names).length) {
+          db.collection("data/users/" + uid).doc("ajustes").set({ nombres: state.names }).catch(() => {});
+        }
         snap.docs.forEach(d => {
           if (!d.id.startsWith("m-")) return;
           const body = d.data();
@@ -1366,6 +1492,7 @@ td.amt.inc { color: var(--down); font-weight: 700; }
   const saved = ls.get(LS_KEY, null);
   if (saved && saved.months) state.months = saved.months;
   setCurrency(state.currency);
+  applyNames(ls.get(LS_KEY + ":nombres", {}));
   setupControls();
   render();
   connect();

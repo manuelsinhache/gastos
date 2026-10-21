@@ -1,0 +1,730 @@
+<title>Guía del Cuaderno de Gastos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: manual de pasos — cada paso es texto a la izquierda y la pantalla del iPhone ilustrada a la derecha; las partes llevan el color de una categoría del cuaderno */
+:root {
+  --bg: #f3f5f9;
+  --surface: #ffffff;
+  --surface-2: #eef1f6;
+  --ink: #12151c;
+  --ink-2: #4a5161;
+  --muted: #7d8494;
+  --line: #e3e6ed;
+  --accent: #3b3ad6;
+  --accent-wash: rgba(59, 58, 214, 0.08);
+  --warn-wash: rgba(237, 161, 0, 0.14);
+  --shadow: 0 1px 2px rgba(18,21,28,.05), 0 8px 28px -14px rgba(18,21,28,.22);
+  --p1: #2a78d6; --p2: #eb6834; --p3: #1baf7a; --p4: #6250d6; --p5: #e87ba4; --p6: #e34948;
+
+  /* Pantallas de iPhone: ilustraciones con su propio aspecto claro fijo */
+  --ios-bg: #f2f2f7; --ios-card: #ffffff; --ios-ink: #000000; --ios-ink-2: #6c6c70;
+  --ios-blue: #0a7aff; --ios-sep: #d8d8dc; --ios-frame: #1c1c1e;
+
+  --font-display: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-ios: -apple-system, "SF Pro Text", "Figtree", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1015; --surface: #181b22; --surface-2: #20242d;
+    --ink: #eef0f4; --ink-2: #b9bfcc; --muted: #8c93a2; --line: #2a2e38;
+    --accent: #8f8cff; --accent-wash: rgba(143,140,255,0.12); --warn-wash: rgba(201,133,0,0.18);
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 28px -14px rgba(0,0,0,.7);
+    --p1: #3987e5; --p2: #d95926; --p3: #199e70; --p4: #9085e9; --p5: #d55181; --p6: #e66767;
+    --ios-frame: #3a3a3c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1015; --surface: #181b22; --surface-2: #20242d;
+  --ink: #eef0f4; --ink-2: #b9bfcc; --muted: #8c93a2; --line: #2a2e38;
+  --accent: #8f8cff; --accent-wash: rgba(143,140,255,0.12); --warn-wash: rgba(201,133,0,0.18);
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 28px -14px rgba(0,0,0,.7);
+  --p1: #3987e5; --p2: #d95926; --p3: #199e70; --p4: #9085e9; --p5: #d55181; --p6: #e66767;
+  --ios-frame: #3a3a3c;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+.wrap {
+  max-width: 1040px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 36px 64px;
+  display: grid; gap: 56px;
+}
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -0.015em; }
+p { margin: 0; }
+code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .88em; background: var(--surface-2); padding: 1px 6px; border-radius: 6px; overflow-wrap: anywhere; }
+b, strong { font-weight: 700; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+a { color: var(--accent); }
+
+/* Portada */
+.hero { display: grid; gap: 18px; }
+.hero h1 { font-size: clamp(34px, 5.4vw, 56px); font-weight: 800; line-height: 1.02; }
+.hero h1 .swatch { display: inline-flex; gap: 4px; vertical-align: middle; margin-left: 12px; transform: translateY(-6px); }
+.hero h1 .swatch i { width: 9px; height: 28px; border-radius: 3px; display: block; }
+.hero .lead { font-size: 18px; color: var(--ink-2); max-width: 62ch; }
+.toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 8px; }
+.toc a {
+  display: grid; gap: 4px; text-decoration: none; color: var(--ink);
+  background: var(--surface); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow);
+  border-top: 4px solid var(--c);
+}
+.toc a:hover { transform: translateY(-1px); }
+.toc .k { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; font-weight: 700; color: var(--muted); }
+.toc .t { font-family: var(--font-display); font-weight: 600; font-size: 18px; line-height: 1.25; }
+.toc .d { font-size: 14px; color: var(--ink-2); }
+
+/* Partes */
+.part { display: grid; gap: 28px; scroll-margin-top: 16px; }
+.part-head { display: grid; gap: 8px; max-width: 70ch; }
+.part-tag { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; color: var(--ink-2); }
+.part-tag i { width: 12px; height: 12px; border-radius: 4px; background: var(--c); display: block; }
+.part-head h2 { font-size: clamp(26px, 3.6vw, 36px); font-weight: 800; line-height: 1.1; }
+.part-head p { color: var(--ink-2); }
+
+.step {
+  display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 20px 40px; align-items: start;
+  background: var(--surface); border-radius: 20px; padding: 26px 28px; box-shadow: var(--shadow);
+}
+.step.noimg { grid-template-columns: minmax(0, 1fr); }
+.step-text { display: grid; gap: 12px; min-width: 0; align-content: start; }
+.step-num {
+  width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+  font-family: var(--font-display); font-weight: 800; font-size: 17px; color: #fff; background: var(--c);
+}
+.step h3 { font-size: 22px; font-weight: 600; line-height: 1.25; }
+.step-text > p, .step-text li { color: var(--ink-2); max-width: 62ch; }
+.step-text ol, .step-text ul { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.ui { font-weight: 700; color: var(--ink); white-space: nowrap; }
+.step figure { margin: 0; display: grid; justify-items: center; gap: 8px; }
+.step figcaption { font-size: 12.5px; color: var(--muted); text-align: center; max-width: 250px; }
+
+.copy {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  background: var(--surface-2); border-radius: 12px; padding: 8px 8px 8px 12px; min-width: 0;
+}
+.copy code { background: transparent; padding: 0; flex: 1 1 200px; min-width: 0; font-size: 13.5px; color: var(--ink); }
+.copy button {
+  border: 0; background: var(--accent); color: #fff; border-radius: 9px; padding: 6px 12px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+}
+:root[data-theme="dark"] .copy button { color: #12111f; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .copy button { color: #12111f; } }
+
+.note { border-radius: 14px; padding: 14px 16px; background: var(--accent-wash); color: var(--ink); display: grid; gap: 6px; }
+.note.warn { background: var(--warn-wash); }
+.note strong { font-family: var(--font-display); font-weight: 600; font-size: 16px; }
+.note p, .note li { color: var(--ink-2); font-size: 15px; }
+.note ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border-radius: 16px; padding: 16px 18px; box-shadow: var(--shadow); display: grid; gap: 6px; align-content: start; }
+.card h3 { font-size: 18px; font-weight: 600; }
+.card p { color: var(--ink-2); font-size: 15px; }
+
+.table-wrap { overflow-x: auto; background: var(--surface); border-radius: 16px; box-shadow: var(--shadow); }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+tr:last-child td { border-bottom: 0; }
+td code { white-space: nowrap; }
+td .mini { border: 0; background: var(--surface-2); color: var(--ink); border-radius: 8px; padding: 4px 10px; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+
+details.faq { background: var(--surface); border-radius: 14px; padding: 14px 18px; box-shadow: var(--shadow); }
+details.faq summary { cursor: pointer; font-weight: 700; font-size: 16px; }
+details.faq p { color: var(--ink-2); margin-top: 8px; max-width: 70ch; }
+.faqs { display: grid; gap: 10px; }
+
+.foot { color: var(--muted); font-size: 13.5px; display: grid; gap: 6px; }
+
+/* ---------- iPhone ilustrado ---------- */
+.phone {
+  width: 250px; max-width: 100%; aspect-ratio: 9 / 18.6; border-radius: 40px; padding: 9px;
+  background: var(--ios-frame); box-shadow: 0 18px 40px -18px rgba(0,0,0,.45);
+  position: relative; font-family: var(--font-ios); color: var(--ios-ink);
+}
+.phone.tall { aspect-ratio: 9 / 21; }
+.screen { width: 100%; height: 100%; border-radius: 32px; overflow: hidden; background: var(--ios-bg); position: relative; display: flex; flex-direction: column; font-size: 11px; line-height: 1.3; }
+.island { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 72px; height: 20px; border-radius: 12px; background: #000; z-index: 3; }
+.status { display: flex; justify-content: space-between; padding: 10px 22px 0; font-weight: 600; font-size: 11px; height: 30px; flex: none; }
+.status span:last-child { letter-spacing: 1px; }
+.ios-title { font-weight: 800; font-size: 22px; padding: 6px 14px 8px; letter-spacing: -0.02em; }
+.ios-nav { display: flex; justify-content: space-between; align-items: center; padding: 4px 12px 8px; color: var(--ios-blue); font-size: 12px; font-weight: 500; }
+.ios-nav b { color: var(--ios-ink); font-weight: 700; }
+.blue { color: var(--ios-blue); }
+.grey { color: var(--ios-ink-2); }
+.tap { position: relative; }
+.tap::after {
+  content: ""; position: absolute; width: 34px; height: 34px; border-radius: 50%;
+  left: 50%; top: 50%; transform: translate(-50%, -50%);
+  border: 3px solid #ff3b6b; box-shadow: 0 0 0 4px rgba(255,59,107,.25);
+  animation: pulse 1.8s ease-in-out infinite; pointer-events: none;
+}
+.tap.wide::after { width: calc(100% + 10px); height: calc(100% + 8px); border-radius: 12px; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .tap::after { animation: none; } }
+
+/* Mensajes */
+.msg-list { padding: 10px; display: grid; gap: 8px; align-content: start; }
+.bubble { max-width: 82%; background: #e9e9eb; border-radius: 16px; padding: 7px 10px; font-size: 11.5px; }
+.linkcard { max-width: 86%; background: #e9e9eb; border-radius: 16px; overflow: hidden; }
+.linkcard .img { height: 74px; background: linear-gradient(135deg, #2a78d6 0 25%, #eb6834 25% 45%, #1baf7a 45% 62%, #eda100 62% 78%, #e87ba4 78%); }
+.linkcard .txt { padding: 7px 10px; }
+.linkcard .txt b { display: block; font-size: 11.5px; }
+.linkcard .txt span { color: var(--ios-ink-2); font-size: 10px; }
+
+/* Safari + cuaderno */
+.safari-bar { margin: 0 10px 6px; background: #e3e3e8; border-radius: 10px; padding: 6px 10px; text-align: center; font-size: 10.5px; color: var(--ios-ink); }
+.tracker { flex: 1; background: #f3f5f9; padding: 10px; display: grid; gap: 8px; align-content: start; overflow: hidden; }
+.tracker h4 { margin: 0; font-family: var(--font-display); font-size: 17px; font-weight: 800; color: #12151c; letter-spacing: -0.02em; }
+.t-banner { background: rgba(59,58,214,.1); border-radius: 8px; padding: 6px 8px; font-size: 9.5px; color: #12151c; display: grid; gap: 5px; }
+.t-btn { justify-self: start; background: #fff; border: 1px solid rgba(0,0,0,.1); border-radius: 6px; padding: 3px 7px; font-weight: 700; font-size: 9.5px; }
+.t-card { background: #fff; border-radius: 8px; padding: 8px; display: grid; gap: 4px; }
+.t-card .k { font-size: 8px; text-transform: uppercase; letter-spacing: .06em; color: #7d8494; font-weight: 700; }
+.t-card .v { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: #12151c; }
+.bars { display: flex; align-items: flex-end; gap: 7px; height: 64px; padding-top: 4px; }
+.bars div { flex: 1; display: flex; flex-direction: column-reverse; gap: 1px; }
+.bars div i { display: block; border-radius: 1px; }
+.bars div i:last-child { border-radius: 3px 3px 1px 1px; }
+.t-input { background: #f3f5f9; border: 1px solid rgba(0,0,0,.1); border-radius: 6px; padding: 5px 7px; font-size: 10px; color: #12151c; }
+.t-input.big { font-family: var(--font-display); font-weight: 700; font-size: 15px; }
+.t-label { font-size: 8.5px; font-weight: 700; color: #4a5161; }
+.t-primary { background: #3b3ad6; color: #fff; border-radius: 7px; padding: 6px; text-align: center; font-weight: 700; font-size: 10px; }
+.t-ok { font-size: 9px; color: #4a5161; }
+
+/* Atajos: biblioteca */
+.sc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 12px; }
+.sc-tile { border-radius: 12px; padding: 8px; height: 62px; color: #fff; font-weight: 700; font-size: 10.5px; display: flex; flex-direction: column; justify-content: space-between; }
+.sc-tile i { width: 16px; height: 16px; border-radius: 5px; background: rgba(255,255,255,.35); display: block; }
+.plus { font-size: 20px; line-height: 1; font-weight: 400; }
+
+/* Atajos: editor */
+.editor { flex: 1; padding: 0 9px; display: grid; gap: 6px; align-content: start; overflow: hidden; }
+.act { background: var(--ios-card); border-radius: 10px; padding: 7px 8px; display: flex; gap: 7px; align-items: flex-start; font-size: 10px; line-height: 1.45; }
+.act .ic { width: 16px; height: 16px; border-radius: 4px; flex: none; margin-top: 1px; }
+.act .tx { min-width: 0; overflow-wrap: anywhere; }
+.tok { color: var(--ios-blue); }
+.var { display: inline-flex; align-items: center; gap: 3px; background: #e5f0ff; color: var(--ios-blue); border-radius: 5px; padding: 0 5px; font-weight: 600; white-space: nowrap; font-size: 9.5px; }
+.var::before { content: ""; width: 7px; height: 7px; border-radius: 2px; background: var(--vc, var(--ios-blue)); display: inline-block; }
+.searchbar { margin: auto 10px 10px; background: #fff; border-radius: 12px; padding: 8px 10px; color: var(--ios-ink-2); font-size: 10.5px; box-shadow: 0 -1px 0 var(--ios-sep); }
+.editor.small .act { padding: 5px 7px; font-size: 9px; }
+.editor.small .var { font-size: 8.5px; }
+
+/* Alertas y hojas */
+.dim { position: absolute; inset: 0; background: rgba(0,0,0,.28); display: grid; align-content: center; justify-items: center; z-index: 2; }
+.alert { width: 76%; background: rgba(250,250,252,.97); border-radius: 14px; text-align: center; overflow: hidden; }
+.alert .a-body { padding: 12px 12px 10px; display: grid; gap: 7px; }
+.alert .a-body b { font-size: 11.5px; }
+.alert .a-field { background: #fff; border: 1px solid var(--ios-sep); border-radius: 6px; padding: 5px 7px; text-align: left; font-size: 11px; }
+.alert .a-btns { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--ios-sep); }
+.alert .a-btns span { padding: 8px; color: var(--ios-blue); font-size: 11.5px; }
+.alert .a-btns span + span { border-left: 1px solid var(--ios-sep); font-weight: 700; }
+.keypad { position: absolute; left: 0; right: 0; bottom: 0; background: #d1d3d9; padding: 6px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; z-index: 3; }
+.keypad span { background: #fff; border-radius: 5px; text-align: center; padding: 6px 0; font-size: 13px; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--ios-bg); border-radius: 16px 16px 0 0; z-index: 3; padding: 10px 10px 16px; display: grid; gap: 6px; }
+.sheet .s-title { text-align: center; font-weight: 700; font-size: 11.5px; padding-bottom: 2px; }
+.sheet .s-list { background: #fff; border-radius: 10px; overflow: hidden; }
+.sheet .s-list div { padding: 7px 10px; border-bottom: 1px solid var(--ios-sep); font-size: 11px; display: flex; gap: 8px; align-items: center; }
+.sheet .s-list div:last-child { border-bottom: 0; }
+.sheet .s-list i { width: 15px; height: 15px; border-radius: 4px; display: block; flex: none; }
+
+/* Pantalla de inicio */
+.home { flex: 1; padding: 14px 14px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px 10px; align-content: start; background: linear-gradient(170deg, #5a6ee6, #a26bd8 60%, #e79a9a); }
+.app { display: grid; justify-items: center; gap: 3px; color: #fff; font-size: 8.5px; text-shadow: 0 1px 2px rgba(0,0,0,.3); }
+.app i { width: 40px; height: 40px; border-radius: 10px; display: block; background: rgba(255,255,255,.35); }
+
+/* Ajustes */
+.set-list { margin: 0 10px; background: #fff; border-radius: 10px; overflow: hidden; }
+.set-list div { padding: 8px 10px; border-bottom: 1px solid var(--ios-sep); display: flex; justify-content: space-between; font-size: 11px; }
+.set-list div:last-child { border-bottom: 0; }
+.set-head { padding: 8px 22px 4px; font-size: 9.5px; text-transform: uppercase; color: var(--ios-ink-2); }
+
+/* Zoom de un campo */
+.zoom { width: 270px; max-width: 100%; background: var(--ios-bg); border-radius: 18px; padding: 12px; font-family: var(--font-ios); color: var(--ios-ink); display: grid; gap: 8px; box-shadow: 0 12px 30px -16px rgba(0,0,0,.4); }
+.zoom .act { font-size: 11.5px; }
+.zoom .var { font-size: 10.5px; }
+.zoom .bar { background: #d1d3d9; border-radius: 10px; padding: 6px; display: flex; gap: 5px; flex-wrap: wrap; font-size: 10.5px; }
+.zoom .bar span { background: #fff; border-radius: 6px; padding: 3px 7px; }
+.zoom .lbl { font-size: 10.5px; color: var(--ios-ink-2); }
+
+@media (max-width: 760px) {
+  .step { grid-template-columns: minmax(0, 1fr); padding: 22px 18px; }
+  .step figure { order: 2; }
+}
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <h1>Guía del Cuaderno de Gastos<span class="swatch" aria-hidden="true"><i style="background:var(--p1)"></i><i style="background:var(--p2)"></i><i style="background:var(--p3)"></i><i style="background:#eda100"></i><i style="background:var(--p5)"></i></span></h1>
+    <p class="lead">Te han compartido un cuaderno para apuntar tus gastos y verlos en gráficos de colores. Esta guía te lleva desde el enlace hasta apuntar un gasto con un toque desde la pantalla de inicio de tu iPhone. Sin instalar nada.</p>
+    <nav class="toc" aria-label="Partes de la guía">
+      <a href="#abrir" style="--c:var(--p1)"><span class="k">Parte 1 · 2 min</span><span class="t">Abrir el cuaderno</span><span class="d">El enlace, la moneda y dónde se guardan tus datos.</span></a>
+      <a href="#icono" style="--c:var(--p2)"><span class="k">Parte 2 · 3 min</span><span class="t">Un icono en tu pantalla</span><span class="d">Un atajo que abre el cuaderno con un toque.</span></a>
+      <a href="#atajo" style="--c:var(--p3)"><span class="k">Parte 3 · 10 min</span><span class="t">Atajo «Añadir gasto»</span><span class="d">Te pregunta importe y categoría, y lo deja listo para guardar.</span></a>
+      <a href="#extras" style="--c:var(--p4)"><span class="k">Parte 4 · opcional</span><span class="t">Más rápido todavía</span><span class="d">Botones de un toque, Siri y el toque en la espalda del iPhone.</span></a>
+    </nav>
+  </header>
+
+  <!-- ================= PARTE 1 ================= -->
+  <section class="part" id="abrir" style="--c:var(--p1)">
+    <div class="part-head">
+      <span class="part-tag"><i></i>Parte 1</span>
+      <h2>Abrir el cuaderno</h2>
+      <p>Solo necesitas el enlace. Ábrelo siempre en Safari: es donde se quedan guardados tus gastos.</p>
+    </div>
+
+    <article class="step">
+      <div class="step-text">
+        <span class="step-num">1</span>
+        <h3>Toca el enlace que te enviaron</h3>
+        <p>Llega por WhatsApp, Mensajes o correo. Si al tocarlo se abre otra app, mantén el dedo sobre el enlace y elige <span class="ui">Abrir en Safari</span>. También puedes copiarlo aquí y pegarlo en la barra de Safari:</p>
+        <div class="copy"><code id="u-base">https://claude.ai/artifact/CTUALRQUnos1nQUkc4uiVo</code><button type="button" data-copy="u-base">Copiar</button></div>
+        <p>Si te pide iniciar sesión, entra con una cuenta de Claude. Es gratuita.</p>
+      </div>
+      <figure>
+        <div class="phone" aria-hidden="true"><div class="screen">
+          <div class="island"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="ios-nav"><span>‹ Chats</span><b>Ana</b><span></span></div>
+          <div class="msg-list">
+            <div class="bubble">Te paso el cuaderno de gastos que uso, está genial 👇</div>
+            <div class="linkcard tap wide"><div class="img"></div><div class="txt"><b>Cuaderno de Gastos</b><span>claude.ai</span></div></div>
+          </div>
+        </div></div>
+        <figcaption>Ilustración: un enlace recibido por mensaje.</figcaption>
+      </figure>
+    </article>
+
+    <article class="step">
+      <div class="step-text">
+        <span class="step-num">2</span>
+        <h3>Empieza en blanco</h3>
+        <p>La primera vez verás <b>datos de ejemplo</b> para que sepas cómo queda. Pulsa <span class="ui">Empezar en blanco</span>, o apunta tu primer gasto en <span class="ui">Añadir gasto</span> y los ejemplos desaparecen solos.</p>
+        <p>Arriba a la derecha elige tu moneda: euro, dólar, peso mexicano, colombiano, argentino, chileno o sol peruano.</p>
+      </div>
+      <figure>
+        <div class="phone" aria-hidden="true"><div class="screen">
+          <div class="island"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="safari-bar">🔒 claude.ai</div>
+          <div class="tracker">
+            <h4>Cuaderno de Gastos</h4>
+            <div class="t-banner"><span><b>Estás viendo datos de ejemplo.</b> Añade tu primer gasto…</span><span class="t-btn tap">Empezar en blanco</span></div>
+            <div class="t-card"><span class="k">Total del periodo</span><span class="v">1.102,57 €</span></div>
+            <div class="t-card"><span class="k">Gasto por mes</span>
+              <div class="bars">
+                <div><i style="height:30px;background:#2a78d6"></i><i style="height:9px;background:#eb6834"></i><i style="height:6px;background:#1baf7a"></i><i style="height:6px;background:#e87ba4"></i></div>
+                <div><i style="height:34px;background:#2a78d6"></i><i style="height:7px;background:#eb6834"></i><i style="height:8px;background:#1baf7a"></i><i style="height:5px;background:#6250d6"></i></div>
+                <div><i style="height:28px;background:#2a78d6"></i><i style="height:10px;background:#eb6834"></i><i style="height:4px;background:#eda100"></i><i style="height:7px;background:#e87ba4"></i></div>
+                <div><i style="height:36px;background:#2a78d6"></i><i style="height:6px;background:#eb6834"></i><i style="height:9px;background:#1baf7a"></i><i style="height:4px;background:#008300"></i></div>
+                <div><i style="height:25px;background:#2a78d6"></i><i style="height:8px;background:#eb6834"></i><i style="height:6px;background:#e87ba4"></i><i style="height:5px;background:#6250d6"></i></div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+        <figcaption>Ilustración: el cuaderno con los datos de ejemplo.</figcaption>
+      </figure>
+    </article>
+
+    <div class="note warn">
+      <strong>Dónde se guardan tus gastos</strong>
+      <ul>
+        <li>En <b>este iPhone, dentro de Safari</b>. Nadie más los ve, tampoco quien te compartió el enlace.</li>
+        <li>No uses la <b>navegación privada</b>: al cerrarla se borra todo.</li>
+        <li>Si el enlace se abre a veces en Safari y a veces en la app de Claude, verás dos cuadernos distintos. Usa siempre la misma vía. Los atajos de esta guía abren Safari.</li>
+        <li>Safari puede borrar los datos de una web que no visitas en varias semanas. Abre el cuaderno a menudo y, una vez al mes, pulsa <span class="ui">Exportar CSV</span> para tener una copia. Con <span class="ui">Importar CSV</span> la recuperas, también en otro teléfono.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= PARTE 2 ================= -->
+  <section class="part" id="icono" style="--c:var(--p2)">
+    <div class="part-head">
+      <span class="part-tag"><i></i>Parte 2</span>
+      <h2>Un icono en tu pantalla de inicio</h2>
+      <p>Creamos un atajo de una sola acción que abre el cuaderno, y lo ponemos junto a tus apps. La app <b>Atajos</b> viene instalada en el iPhone. Si la borraste, búscala en el App Store.</p>
+    </div>
+
+    <article class="step">
+      <div class="step-text">
+        <span class="step-num">1</span>
+        <h3>Abre Atajos y pulsa «+»</h3>
+        <p>Está arriba a la derecha, en la pestaña <span class="ui">Atajos</span>. Se abre un atajo vacío.</p>
+      </div>
+      <figure>
+        <div class="phone" aria-hidden="true"><div class="screen">
+          <div class="island"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="ios-nav"><span>‹ Atajos</span><span></span><span class="plus tap">+</span></div>
+          <div class="ios-title">Todos los atajos</div>
+          <div class="sc-grid">
+            <div class="sc-tile" style="background:#ff9f0a"><i></i>Temporizador</div>
+            <div class="sc-tile" style="background:#30b0c7"><i></i>Llamar a casa</div>
+            <div class="sc-tile" style="background:#5e5ce6"><i></i>Modo noche</div>
+            <div class="sc-tile" style="background:#34c759"><i></i>Ruta al trabajo</div>
+          </div>
+        </div></div>
+        <figcaption>Ilustración: la app Atajos.</figcaption>
+      </figure>
+    </article>
+
+    <article class="step">
+      <div class="step-text">
+        <span class="step-num">2</span>
+        <h3>Añade la acción «Abrir URL»</h3>
+        <ol>
+          <li>Abajo, toca <span class="ui">Buscar apps y acciones</span> y escribe <code>abrir url</code>.</li>
+          <li>Toca <span class="ui">Abrir URL</span>.</li>
+          <li>Toca la palabra azul <span class="ui">URL</span> y pega esta dirección:</li>
+        </ol>
+        <div class="copy"><code id="u-base2">https://claude.ai/artifact/CTUALRQUnos1nQUkc4uiVo</code><button type="button" data-copy="u-base2">Copiar</button></div>
+      </div>
+      <figure>
+        <div class="phone" aria-hidden="true"><div class="screen">
+          <div class="island"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="ios-nav"><span>‹</span><b>Cuaderno de Gastos ⌄</b><span>OK</span></div>
+          <div class="editor">
+            <div class="act tap wide"><span class="ic" style="background:#0a7aff"></span><span class="tx">Abrir <span class="tok">https://claude.ai/artifact/CTUALRQUnos1nQUkc4uiVo</span></span></div>
+          </div>
+          <div class="searchbar">🔍 Buscar apps y acciones</div>
+        </div></div>
+        <figcaption>Ilustración: el atajo con su única acción.</figcaption>
+      </figure>
+    </article>
+
+    <article class="step">
+      <div class="step-text">
+        <span class="step-num">3</span>
+        <h3>Ponle nombre y llévalo a la pantalla de inicio</h3>
+        <ol>
+          <li>Toca el nombre de arriba, elige <span class="ui">Renombrar</span> y escribe <b>Cuaderno de Gastos</b>. En <span class="ui">Elegir icono</span> puedes darle color.</li>
+          <li>En el mismo menú, toca <span class="ui">Añadir a pantalla de inicio</span> y luego <span class="ui">Añadir</span>.</li>
+          <li>Pulsa <span class="ui">OK</span> para guardar el atajo.</li>
+        </ol>
+        <p>Ya tienes el icono. Al tocarlo, se abre el cuaderno en Safari.</p>
+      </div>
+      <figure>
+        <div class="phone" aria-hidden="true"><div class="screen">
+          <div class="island"></div><div class="status" style="color:#fff"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="home">
+            <div class="app"><i></i>Fotos</div><div class="app"><i></i>Cámara</div><div class="app"><i></i>Mapas</div><div class="app"><i></i>Tiempo</div>
+            <div class="app"><i></i>Notas</div><div class="app"><i></i>Reloj</div><div class="app"><i></i>Música</div>
+            <div class="app tap"><i style="background:linear-gradient(135deg,#2a78d6 0 33%,#eb6834 33% 66%,#1baf7a 66%)"></i>Cuaderno</div>
+          </div>
+        </div></div>
+        <figcaption>Ilustración: el icono nuevo en la pantalla de inicio.</figcaption>
+      </figure>
+    </article>
+  </section>
+
+  <!-- ================= PARTE 3 ================= -->
+  <section class="part" id="atajo" style="--c:var(--p3)">
+    <div class="part-head">
+      <span class="part-tag"><i></i>Parte 3</span>
+      <h2>El atajo «Añadir gasto»</h2>
+      <p>Te pregunta cuánto, en qué categoría y un concepto. Después abre el cuaderno con todo rellenado y solo pulsas <b>Añadir gasto</b>. Son siete acciones que se colocan una debajo de otra.</p>
+    </div>
+
+    <div class="note">
+      <strong>¿Te han pasado el atajo ya hecho?</strong>
+      <p>Si quien te compartió el cuaderno te envía un enlace de iCloud al atajo, tócalo y pulsa <span class="ui">Añadir atajo</span>. Funciona igual para todos porque la dirección del cuaderno es la misma. Salta al <a href="#probar">paso 6</a>.</p>
+    </div>
+
+    <article class="step">
+      <div class="step-text">
+        <span class="step-num">1</span>
+        <h3>Pregunta el importe</h3>
+        <ol>
+          <li>Crea un atajo nuevo con <span class="ui">+</span> y llámalo <b>Añadir gasto</b>.</li>
+          <li>Busca y añade <span class="ui">Solicitar entrada</span>.</li>
+          <li>Toca <span class="tok-txt ui">Texto</span> y cámbialo a <span class="ui">Número</span>.</li>
+          <li>Toca <span class="ui">Solicitud</span> y escribe <code>¿Cuánto has gastado?</code></li>
+        </ol>
+        <p>Después añade <span class="ui">Reemplazar texto</span>. En el primer hueco escribe una coma <code>,</code> y en el segundo un punto <code>.</code>. El tercer hueco debe decir <span class="ui">Entrada proporcionada</span>. Así «12,50» viaja bien en el enlace.</p>
+      </div>
+      <figure>
+        <div class="phone" aria-hidden="true"><div class="screen">
+          <div class="island"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="ios-nav"><span>‹</span><b>Añadir gasto ⌄</b><span>OK</span></div>
+          <div class="editor">
+            <div class="act"><span class="ic" style="background:#30b0c7"></span><span class="tx">Solicitar <span class="tok">Número</span> con <span class="tok">¿Cuánto has gastado?</span></span></div>
+            <div class="act tap wide"><span class="ic" style="background:#ffcc00"></span><span class="tx">Reemplazar <span class="tok">,</span> por <span class="tok">.</span> en <span class="var" style="--vc:#30b0c7">Entrada proporcionada</span></span></div>
+          </div>
+          <div class="searchbar">🔍 Buscar apps y acciones</div>
+        </div></div>
+        <figcaption>Ilustración: las dos primeras acciones.</figcaption>
+      </figure>
+    </article>
+
+    <article class="step">
+      <div class="step-text">
+        <span class="step-num">2</span>
+        <h3>La lista de categorías</h3>
+        <ol>
+          <li>Añade la acción <span class="ui">Lista</span>. Borra los elementos de ejemplo y escribe estos nueve, <b>sin tildes</b>:</li>
+        </ol>
+        <div class="copy"><code>Comida · Transporte · Entretenimiento · Suscripciones · Hogar · Salud · Compras · Educacion · Otros</code></div>
+        <ol start="2">
+          <li>Añade <span class="ui">Seleccionar de la lista</span>. Se conecta sola con la lista de arriba.</li>
+        </ol>
+      </div>
+      <figure>
+        <div class="phone" aria-hidden="true"><div class="screen">
+          <div class="island"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="ios-nav"><span>‹</span><b>Añadir gasto ⌄</b><span>OK</span></div>
+          <div class="editor">
+            <div class="act tap wide"><span class="ic" style="background:#ff9500"></span><span class="tx">Lista<br><span class="grey">Comida · Transporte · Entretenimiento · Suscripciones · Hogar · Salud · Compras · Educacion · Otros</span></span></div>
+            <div class="act"><span class="ic" style="background:#ff9500"></span><span class="tx">Seleccionar de <span class="var" style="--vc:#ff9500">Lista</span></span></div>
+          </div>
+          <div class="searchbar">🔍 Buscar apps y acciones</div>
+        </div></div>
+        <figcaption>Ilustración: la lista y la selección.</figcaption>
+      </figure>
+    </article>
+
+    <article class="step">
+      <div class="step-text">
+        <span class="step-num">3</span>
+        <h3>Pregunta el concepto</h3>
+        <ol>
+          <li>Añade otra vez <span class="ui">Solicitar entrada</span>. Déjala en <span class="ui">Texto</span> y como solicitud escribe <code>Concepto (sin tildes)</code>.</li>
+          <li>Añade otro <span class="ui">Reemplazar texto</span>. En el primer hueco pon <b>un espacio</b> y en el segundo un guion bajo <code>_</code>.</li>
+          <li>Comprueba que el tercer hueco dice <span class="ui">Entrada proporcionada</span> de <b>esta segunda pregunta</b>, no de la primera. Si no, tócalo, elige <span class="ui">Seleccionar variable</span> y toca la burbuja azul que aparece bajo la pregunta del concepto.</li>
+        </ol>
+      </div>
+      <figure>
+        <div class="phone" aria-hidden="true"><div class="screen">
+          <div class="island"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="ios-nav"><span>‹</span><b>Añadir gasto ⌄</b><span>OK</span></div>
+          <div class="editor">
+            <div class="act"><span class="ic" style="background:#30b0c7"></span><span class="tx">Solicitar <span class="tok">Texto</span> con <span class="tok">Concepto (sin tildes)</span></span></div>
+            <div class="act tap wide"><span class="ic" style="background:#ffcc00"></span><span class="tx">Reemplazar <span class="tok">␣</span> por <span class="tok">_</span> en <span class="var" style="--vc:#30b0c7">Entrada proporcionada</span></span></div>
+          </div>
+          <div class="searchbar">🔍 Buscar apps y acciones</div>
+        </div></div>
+        <figcaption>Ilustración: «␣» representa el espacio que escribes.</figcaption>
+      </figure>
+    </article>
+
+    <article class="step">
+      <div class="step-text">
+        <span class="step-num">4</span>
+        <h3>Arma el enlace con las tres respuestas</h3>
+        <ol>
+          <li>Añade <span class="ui">Abrir URL</span> y, en <span class="ui">URL</span>, pega:</li>
+        </ol>
+        <div class="copy"><code id="u-nuevo">https://claude.ai/artifact/CTUALRQUnos1nQUkc4uiVo#nuevo-</code><button type="button" data-copy="u-nuevo">Copiar</button></div>
+        <ol start="2">
+          <li>Sin mover el cursor del final, toca en la barra sobre el teclado la variable <span class="ui">Texto actualizado</span> del <b>importe</b>.</li>
+          <li>Escribe un guion <code>-</code> e inserta <span class="ui">Elemento seleccionado</span>.</li>
+          <li>Escribe otro guion <code>-</code> e inserta el <span class="ui">Texto actualizado</span> del <b>concepto</b>.</li>
+        </ol>
+        <p>Hay dos variables que se llaman <span class="ui">Texto actualizado</span>. Si dudas, usa <span class="ui">Seleccionar variable</span> y toca la burbuja que aparece bajo el «Reemplazar» correcto.</p>
+      </div>
+      <figure>
+        <div class="zoom" aria-hidden="true">
+          <span class="lbl">Así debe quedar la acción</span>
+          <div class="act"><span class="ic" style="background:#0a7aff"></span><span class="tx">Abrir <span class="tok">https://claude.ai/artifact/CTUALRQUnos1nQUkc4uiVo#nuevo-</span><span class="var" style="--vc:#ffcc00">Texto actualizado</span><span class="tok">-</span><span class="var" style="--vc:#ff9500">Elemento seleccionado</span><span class="tok">-</span><span class="var" style="--vc:#ffcc00">Texto actualizado</span></span></div>
+          <span class="lbl">Barra de variables sobre el teclado</span>
+          <div class="bar"><span>Seleccionar variable</span><span class="tap wide">Texto actualizado</span><span>Elemento seleccionado</span></div>
+        </div>
+        <figcaption>Ilustración: la acción final, ampliada.</figcaption>
+      </figure>
+    </article>
+
+    <article class="step">
+      <div class="step-text">
+        <span class="step-num">5</span>
+        <h3>Revisa el atajo completo</h3>
+        <p>De arriba abajo, debe tener estas siete acciones:</p>
+        <ol>
+          <li>Solicitar entrada (Número)</li>
+          <li>Reemplazar texto <code>,</code> → <code>.</code></li>
+          <li>Lista</li>
+          <li>Seleccionar de la lista</li>
+          <li>Solicitar entrada (Texto)</li>
+          <li>Reemplazar texto «espacio» → <code>_</code></li>
+          <li>Abrir URL</li>
+        </ol>
+        <p>Pulsa <span class="ui">OK</span> para guardar.</p>
+      </div>
+      <figure>
+        <div class="phone tall" aria-hidden="true"><div class="screen">
+          <div class="island"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="ios-nav"><span>‹</span><b>Añadir gasto ⌄</b><span class="tap">OK</span></div>
+          <div class="editor small">
+            <div class="act"><span class="ic" style="background:#30b0c7"></span><span class="tx">Solicitar <span class="tok">Número</span> con <span class="tok">¿Cuánto has gastado?</span></span></div>
+            <div class="act"><span class="ic" style="background:#ffcc00"></span><span class="tx">Reemplazar <span class="tok">,</span> por <span class="tok">.</span> en <span class="var" style="--vc:#30b0c7">Entrada proporcionada</span></span></div>
+            <div class="act"><span class="ic" style="background:#ff9500"></span><span class="tx">Lista <span class="grey">· 9 elementos</span></span></div>
+            <div class="act"><span class="ic" style="background:#ff9500"></span><span class="tx">Seleccionar de <span class="var" style="--vc:#ff9500">Lista</span></span></div>
+            <div class="act"><span class="ic" style="background:#30b0c7"></span><span class="tx">Solicitar <span class="tok">Texto</span> con <span class="tok">Concepto (sin tildes)</span></span></div>
+            <div class="act"><span class="ic" style="background:#ffcc00"></span><span class="tx">Reemplazar <span class="tok">␣</span> por <span class="tok">_</span> en <span class="var" style="--vc:#30b0c7">Entrada proporcionada</span></span></div>
+            <div class="act"><span class="ic" style="background:#0a7aff"></span><span class="tx">Abrir <span class="tok">https://claude.ai/…#nuevo-</span><span class="var" style="--vc:#ffcc00">Texto actualizado</span><span class="tok">-</span><span class="var" style="--vc:#ff9500">Elemento seleccionado</span><span class="tok">-</span><span class="var" style="--vc:#ffcc00">Texto actualizado</span></span></div>
+          </div>
+        </div></div>
+        <figcaption>Ilustración: el atajo terminado.</figcaption>
+      </figure>
+    </article>
+
+    <article class="step" id="probar">
+      <div class="step-text">
+        <span class="step-num">6</span>
+        <h3>Pruébalo</h3>
+        <ol>
+          <li>Toca el atajo. Escribe el importe con el teclado numérico, por ejemplo <b>12,50</b>, y pulsa <span class="ui">OK</span>.</li>
+          <li>Elige la categoría en la lista.</li>
+          <li>Escribe el concepto, sin tildes, o déjalo vacío.</li>
+          <li>Se abre el cuaderno con todo rellenado y el mensaje <b>Recibido desde Atajos</b>. Revisa y pulsa <span class="ui">Añadir gasto</span>.</li>
+        </ol>
+        <p>Desde el menú del atajo también puedes ponerlo en la pantalla de inicio, igual que en la Parte 2.</p>
+      </div>
+      <figure>
+        <div class="phone" aria-hidden="true"><div class="screen">
+          <div class="island"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="ios-title">Todos los atajos</div>
+          <div class="sc-grid"><div class="sc-tile" style="background:#34c759"><i></i>Añadir gasto</div><div class="sc-tile" style="background:#ff9f0a"><i></i>Cuaderno de Gastos</div></div>
+          <div class="dim" style="align-content:start;padding-top:70px">
+            <div class="alert"><div class="a-body"><b>¿Cuánto has gastado?</b><div class="a-field">12,50</div></div><div class="a-btns"><span>Cancelar</span><span class="tap">OK</span></div></div>
+          </div>
+          <div class="keypad"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>,</span><span>0</span><span>⌫</span></div>
+        </div></div>
+        <figcaption>Ilustración: la primera pregunta del atajo.</figcaption>
+      </figure>
+    </article>
+
+    <article class="step">
+      <div class="step-text">
+        <span class="step-num">7</span>
+        <h3>Elige la categoría y guarda</h3>
+        <p>La lista aparece desde abajo. Después de la pregunta del concepto, Safari abre el cuaderno con el formulario listo. Solo falta un toque.</p>
+        <p>Si quieres cambiar algo, como la fecha o poner tildes al concepto, hazlo en el formulario antes de pulsar el botón.</p>
+      </div>
+      <figure style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center">
+        <div class="phone" aria-hidden="true" style="width:200px"><div class="screen">
+          <div class="island"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="dim"></div>
+          <div class="sheet">
+            <div class="s-title">Categoría</div>
+            <div class="s-list">
+              <div class="tap wide"><i style="background:#2a78d6"></i>Comida</div>
+              <div><i style="background:#eb6834"></i>Transporte</div>
+              <div><i style="background:#1baf7a"></i>Entretenimiento</div>
+              <div><i style="background:#eda100"></i>Suscripciones</div>
+              <div><i style="background:#e87ba4"></i>Hogar</div>
+              <div class="grey">…</div>
+            </div>
+          </div>
+        </div></div>
+        <div class="phone" aria-hidden="true" style="width:200px"><div class="screen">
+          <div class="island"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="safari-bar">🔒 claude.ai</div>
+          <div class="tracker">
+            <h4 style="font-size:14px">Añadir gasto</h4>
+            <span class="t-label">Importe</span><div class="t-input big">€ 12,5</div>
+            <span class="t-label">Concepto</span><div class="t-input">Cafe con leche</div>
+            <span class="t-label">Categoría</span><div class="t-input">Comida y súper</div>
+            <div class="t-primary tap wide">Añadir gasto</div>
+            <span class="t-ok">Recibido desde Atajos. Revisa los datos y pulsa «Añadir gasto».</span>
+          </div>
+        </div></div>
+        <figcaption>Ilustración: la lista de categorías y el formulario rellenado.</figcaption>
+      </figure>
+    </article>
+  </section>
+
+  <!-- ================= PARTE 4 ================= -->
+  <section class="part" id="extras" style="--c:var(--p4)">
+    <div class="part-head">
+      <span class="part-tag"><i></i>Parte 4</span>
+      <h2>Más rápido todavía</h2>
+      <p>Para los gastos que repites, un atajo sin preguntas: lo tocas y el formulario aparece rellenado. Se hace como el de la Parte 2, con una acción <span class="ui">Abrir URL</span> y una de estas direcciones.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Atajo</th><th>Dirección para «Abrir URL»</th><th><span hidden>Copiar</span></th></tr></thead>
+        <tbody>
+          <tr><td>Café</td><td><code id="q1">https://claude.ai/artifact/CTUALRQUnos1nQUkc4uiVo#nuevo-2.50-comida-Cafe</code></td><td><button class="mini" type="button" data-copy="q1">Copiar</button></td></tr>
+          <tr><td>Súper</td><td><code id="q2">https://claude.ai/artifact/CTUALRQUnos1nQUkc4uiVo#nuevo-0-comida-Supermercado</code></td><td><button class="mini" type="button" data-copy="q2">Copiar</button></td></tr>
+          <tr><td>Gasolina</td><td><code id="q3">https://claude.ai/artifact/CTUALRQUnos1nQUkc4uiVo#nuevo-0-transporte-Gasolina</code></td><td><button class="mini" type="button" data-copy="q3">Copiar</button></td></tr>
+          <tr><td>Formulario vacío</td><td><code id="q4">https://claude.ai/artifact/CTUALRQUnos1nQUkc4uiVo#nuevo</code></td><td><button class="mini" type="button" data-copy="q4">Copiar</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="color:var(--ink-2);max-width:70ch">El formato es <code>#nuevo-IMPORTE-CATEGORIA-CONCEPTO</code>. Usa punto para los decimales y <code>_</code> en vez de espacios. Con importe <code>0</code> se rellenan la categoría y el concepto, y tú escribes la cantidad.</p>
+
+    <div class="cards">
+      <div class="card"><h3>Con Siri</h3><p>Di <b>«Oye Siri, Añadir gasto»</b>. Siri usa el nombre del atajo, así que funciona sin configurar nada.</p></div>
+      <div class="card"><h3>Widget</h3><p>Mantén pulsada la pantalla de inicio, toca <span class="ui">Editar</span> → <span class="ui">Añadir widget</span> → <span class="ui">Atajos</span> y elige tus atajos de gastos.</p></div>
+      <div class="card"><h3>Botón de acción</h3><p>En iPhone 15 Pro y posteriores: <span class="ui">Ajustes</span> → <span class="ui">Botón de acción</span> → <span class="ui">Atajo</span> → <b>Añadir gasto</b>.</p></div>
+    </div>
+
+    <article class="step">
+      <div class="step-text">
+        <span class="step-num">★</span>
+        <h3>Toque en la espalda del iPhone</h3>
+        <p>Dos golpecitos en la parte trasera del teléfono lanzan el atajo, incluso sin desbloquear la pantalla de inicio.</p>
+        <ol>
+          <li>Abre <span class="ui">Ajustes</span> → <span class="ui">Accesibilidad</span> → <span class="ui">Tocar</span>.</li>
+          <li>Baja hasta <span class="ui">Tocar atrás</span> y elige <span class="ui">Doble toque</span>.</li>
+          <li>En la sección Atajos, marca <b>Añadir gasto</b>.</li>
+        </ol>
+      </div>
+      <figure>
+        <div class="phone" aria-hidden="true"><div class="screen">
+          <div class="island"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="ios-nav"><span>‹ Tocar atrás</span><b>Doble toque</b><span></span></div>
+          <div class="set-head">Sistema</div>
+          <div class="set-list"><div>Ninguno</div><div>Captura de pantalla</div><div>Linterna</div></div>
+          <div class="set-head">Atajos</div>
+          <div class="set-list"><div class="tap wide">Añadir gasto <span class="blue">✓</span></div><div>Cuaderno de Gastos</div></div>
+        </div></div>
+        <figcaption>Ilustración: Ajustes › Accesibilidad › Tocar › Tocar atrás.</figcaption>
+      </figure>
+    </article>
+  </section>
+
+  <!-- ================= PROBLEMAS ================= -->
+  <section class="part" id="ayuda" style="--c:var(--p6)">
+    <div class="part-head">
+      <span class="part-tag"><i></i>Si algo falla</span>
+      <h2>Problemas frecuentes</h2>
+    </div>
+    <div class="faqs">
+      <details class="faq"><summary>El cuaderno se abre, pero el formulario está vacío</summary><p>Seguramente se abrió en la app de Claude en vez de en Safari, y la app no recibe la parte del enlace con el gasto. Puedes escribir el gasto a mano, o abrir el cuaderno en Safari y repetir el atajo. Recuerda que los gastos de la app y los de Safari se guardan por separado.</p></details>
+      <details class="faq"><summary>El importe sale mal o no aparece</summary><p>Revisa el primer «Reemplazar texto»: debe cambiar la coma <code>,</code> por un punto <code>.</code> y actuar sobre la respuesta del importe. En el enlace no puede ir una coma.</p></details>
+      <details class="faq"><summary>El concepto llega cortado o sin las letras con tilde</summary><p>El enlace solo transporta letras sin acentos, números, punto, guion y guion bajo. Escribe el concepto sin tildes ni eñes y corrígelo en el formulario si quieres.</p></details>
+      <details class="faq"><summary>La categoría siempre sale como «Otros»</summary><p>Comprueba que los elementos de la lista están escritos tal cual: Comida, Transporte, Entretenimiento, Suscripciones, Hogar, Salud, Compras, Educacion y Otros. Sin tildes ni espacios extra.</p></details>
+      <details class="faq"><summary>Han desaparecido mis gastos</summary><p>Mira si abriste el cuaderno por otra vía, como la app de Claude, otro navegador o una pestaña privada. Si Safari borró los datos, usa <span class="ui">Importar CSV</span> con tu última copia exportada.</p></details>
+      <details class="faq"><summary>Los nombres de los menús no coinciden con mi iPhone</summary><p>Apple cambia algún nombre entre versiones de iOS. Si no encuentras una acción, búscala en inglés: Ask for Input, Replace Text, List, Choose from List, Open URLs. Las ilustraciones de esta guía son aproximadas, no capturas reales.</p></details>
+    </div>
+  </section>
+
+  <!-- ================= QUIEN COMPARTE ================= -->
+  <section class="part" id="compartir" style="--c:var(--p5)">
+    <div class="part-head">
+      <span class="part-tag"><i></i>Para quien comparte</span>
+      <h2>Ahórrales la Parte 3</h2>
+      <p>Si ya creaste el atajo «Añadir gasto», puedes pasarlo hecho. En la app Atajos, mantén pulsado el atajo → <span class="ui">Compartir</span> → <span class="ui">Copiar enlace de iCloud</span>, y envía ese enlace junto con el del cuaderno. Cada persona guarda sus propios gastos en su teléfono: compartir el cuaderno o el atajo no comparte los datos.</p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>Las pantallas del iPhone de esta guía son ilustraciones; los nombres pueden variar un poco según tu versión de iOS.</p>
+  </footer>
+</div>
+
+<script>
+document.querySelectorAll("[data-copy]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const src = document.getElementById(btn.dataset.copy);
+    const text = src.textContent.trim();
+    const done = () => { const old = btn.textContent; btn.textContent = "Copiado"; setTimeout(() => { btn.textContent = old; }, 1600); };
+    const fallback = () => { const r = document.createRange(); r.selectNodeContents(src); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = "Selecciona y copia"; };
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch { fallback(); }
+  });
+});
+</script>

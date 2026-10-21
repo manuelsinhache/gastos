@@ -1,15 +1,18 @@
 # Cuaderno de Gastos
 
-Registro de gastos personal con gráficos mensuales por categoría, resumen semanal y filtro por fechas. Funciona en el navegador, sin cuenta: cada persona guarda sus gastos en su propio dispositivo.
+Registro personal de ingresos y gastos con gráficos mensuales por categoría, balance, resumen semanal y filtro por fechas. Funciona en el navegador, sin cuenta: cada persona guarda sus movimientos en su propio dispositivo.
 
 - **Cuaderno:** https://manuelsinhache.github.io/gastos/
 - **Guía para iPhone y Atajos:** https://manuelsinhache.github.io/gastos/guia/
 
-## Añadir gastos desde un enlace
+## Añadir movimientos desde un enlace
 
 `https://manuelsinhache.github.io/gastos/#nuevo-IMPORTE-CATEGORIA-CONCEPTO` abre el formulario rellenado. Usa punto decimal y `_` en lugar de espacios. Por ejemplo: `#nuevo-12.50-comida-Cafe_con_leche`.
 
-Categorías: `comida`, `transporte`, `entretenimiento`, `suscripciones`, `hogar`, `salud`, `compras`, `educacion`, `otros`.
+Para un ingreso usa `#ingreso-` en lugar de `#nuevo-`, por ejemplo `#ingreso-1500-salario-Nomina`.
+
+Categorías de gasto: `comida`, `transporte`, `entretenimiento`, `suscripciones`, `hogar`, `salud`, `compras`, `educacion`, `otros`.
+Categorías de ingreso: `salario`, `extra`, `ventas`, `regalos`, `otros`.
 
 ## Herramientas
 

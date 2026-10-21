@@ -265,6 +265,12 @@ td.desc { min-width: 140px; }
 .rowbtns { display: flex; gap: 2px; justify-content: flex-end; }
 .del.edit:hover { color: var(--accent); }
 tr.editing td { background: var(--accent-wash); }
+.title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; min-width: 0; }
+.title-row h1 { min-width: 0; overflow-wrap: anywhere; }
+.title-btn { border: 1px dashed var(--axis); background: transparent; color: var(--ink-2); border-radius: 999px; padding: 4px 11px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.title-btn:hover { border-style: solid; color: var(--ink); }
+.title-edit { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.title-edit input { font-family: var(--font-display); font-size: clamp(22px, 3.4vw, 32px); font-weight: 800; letter-spacing: -0.02em; border: 1px solid var(--ring); background: var(--surface); border-radius: 12px; padding: 6px 12px; width: min(100%, 520px); min-width: 0; }
 .chip.rename { border-style: dashed; color: var(--ink-2); background: transparent; }
 .chip.rename:hover { color: var(--ink); border-style: solid; }
 .names { display: grid; gap: 18px; }
@@ -299,7 +305,15 @@ td.amt.inc { color: var(--down); font-weight: 700; }
 <div class="wrap">
   <header class="top">
     <div class="brand">
-      <h1>Cuaderno de Gastos<span class="swatch" aria-hidden="true"><i style="background:var(--c1)"></i><i style="background:var(--c2)"></i><i style="background:var(--c3)"></i><i style="background:var(--c4)"></i><i style="background:var(--c5)"></i></span></h1>
+      <div class="title-row" id="title-row">
+      <h1><span id="app-title">Cuaderno de Gastos</span><span class="swatch" aria-hidden="true"><i style="background:var(--c1)"></i><i style="background:var(--c2)"></i><i style="background:var(--c3)"></i><i style="background:var(--c4)"></i><i style="background:var(--c5)"></i></span></h1>
+      <button class="title-btn" id="btn-title" type="button" aria-label="Cambiar el nombre del cuaderno">Cambiar nombre</button>
+      </div>
+      <form class="title-edit" id="title-form" hidden novalidate>
+        <input id="title-input" maxlength="40" autocomplete="off" aria-label="Nombre del cuaderno">
+        <button class="btn primary" type="submit">Guardar</button>
+        <button class="btn ghost" type="button" id="title-cancel">Cancelar</button>
+      </form>
       <p id="subtitle">Lo que entra y lo que sale, mes a mes y semana a semana.</p>
     </div>
     <div class="tools">
@@ -1284,8 +1298,39 @@ td.amt.inc { color: var(--down); font-weight: 700; }
     refreshNameUI();
     render();
     if (state.mode === "cuenta" && state.db && state.uid) {
-      try { await state.db.collection("data/users/" + state.uid).doc("ajustes").set({ nombres: state.names }); }
+      try { await persistAjustes(); }
       catch { flash("No se pudieron guardar los nombres en tu cuenta. De momento se guardan en este navegador."); }
+    }
+  }
+
+  function persistAjustes() {
+    return state.db.collection("data/users/" + state.uid).doc("ajustes").set({ nombres: state.names, titulo: state.title || "" });
+  }
+
+  // ---------- Nombre del cuaderno ----------
+  const DEFAULT_TITLE = "Cuaderno de Gastos";
+  function applyTitle() {
+    const t = state.title || DEFAULT_TITLE;
+    $("#app-title").textContent = t;
+    document.title = t;
+  }
+  function openTitle() {
+    $("#title-input").value = state.title || DEFAULT_TITLE;
+    $("#title-row").hidden = true; $("#title-form").hidden = false;
+    $("#title-input").focus(); $("#title-input").select();
+  }
+  function closeTitle() {
+    $("#title-form").hidden = true; $("#title-row").hidden = false;
+    $("#btn-title").focus();
+  }
+  async function saveTitle() {
+    const v = $("#title-input").value.trim().replace(/\s+/g, " ").slice(0, 40);
+    state.title = v && v !== DEFAULT_TITLE ? v : "";
+    ls.set(LS_KEY + ":titulo", state.title);
+    applyTitle(); closeTitle();
+    if (state.mode === "cuenta" && state.db && state.uid) {
+      try { await persistAjustes(); }
+      catch { flash("No se pudo guardar el nombre en tu cuenta. De momento se guarda en este navegador."); }
     }
   }
 
@@ -1404,6 +1449,10 @@ td.amt.inc { color: var(--down); font-weight: 700; }
       render();
     });
     $("#f-cancel").addEventListener("click", cancelEdit);
+    $("#btn-title").addEventListener("click", openTitle);
+    $("#title-cancel").addEventListener("click", closeTitle);
+    $("#title-form").addEventListener("submit", e => { e.preventDefault(); saveTitle(); });
+    $("#title-input").addEventListener("keydown", e => { if (e.key === "Escape") closeTitle(); });
     $("#btn-clear-sample").addEventListener("click", () => { state.hideSample = true; ls.set(LS_KEY + ":nosample", true); render(); });
     $("#msg-close").addEventListener("click", () => { $("#msg-notice").hidden = true; });
     $("#btn-more").addEventListener("click", () => { state.shown += 60; render(); });
@@ -1463,8 +1512,13 @@ td.amt.inc { color: var(--down); font-weight: 700; }
         const remoteNames = aj && aj.data() && aj.data().nombres;
         if (remoteNames && JSON.stringify(remoteNames) !== JSON.stringify(state.names)) {
           applyNames(remoteNames); ls.set(LS_KEY + ":nombres", state.names); refreshNameUI();
-        } else if (first && !aj && Object.keys(state.names).length) {
-          db.collection("data/users/" + uid).doc("ajustes").set({ nombres: state.names }).catch(() => {});
+        }
+        const remoteTitle = aj && aj.data() ? (aj.data().titulo || "") : null;
+        if (remoteTitle !== null && remoteTitle !== state.title) {
+          state.title = remoteTitle; ls.set(LS_KEY + ":titulo", state.title); applyTitle();
+        }
+        if (first && !aj && (Object.keys(state.names).length || state.title)) {
+          db.collection("data/users/" + uid).doc("ajustes").set({ nombres: state.names, titulo: state.title }).catch(() => {});
         }
         snap.docs.forEach(d => {
           if (!d.id.startsWith("m-")) return;
@@ -1493,6 +1547,8 @@ td.amt.inc { color: var(--down); font-weight: 700; }
   if (saved && saved.months) state.months = saved.months;
   setCurrency(state.currency);
   applyNames(ls.get(LS_KEY + ":nombres", {}));
+  state.title = ls.get(LS_KEY + ":titulo", "") || "";
+  applyTitle();
   setupControls();
   render();
   connect();
